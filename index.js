@@ -30,90 +30,13 @@ module.exports.hook = function(cb) {
     });
 
     var defaultVersion = microservice._config.server.version || '1.0.0';
-    bindRoutes({
+
+    var lib = require('./lib');
+    lib.handleDefinition(microservice, {
+        currentPath: '',
         definition: definition,
-        microservice: microservice,
+        regexPathDefinition: '',
         routes: routes,
         version: defaultVersion
-    });
-
-    cb();
+    }, cb);
 };
-
-function bindRoutes(options) {
-    var defaultPolicies = options.defaultPolicies || [],
-        defaultOptions = options.defaultOptions || {},
-        definition = options.defintion,
-        microservice = options.microservice,
-        rootPath = options.path || '',
-        routes = options.routes || {},
-        version = options.version || '1.0.0';
-
-    // allow default policy chain to be overridden at any depth
-    defaultPolicies = definition.policies || defaultPolicies;
-
-    // allow additional policies to be added to the policy chain
-    if (definition.additionalPolicies && definition.additionalPolicies.length) {
-        defaultPolicies = defaultPolicies.concat(definition.additionalPolicies);
-    }
-
-    // allow default request options to be overridden at any depth
-    defaultOptions = definition.options || defaultOptions;
-
-    // allow additional request options to be added
-    if (definition.additionalOptions && _.isObject(definition.additionalOptions)) {
-        _.extend(defaultOptions, definition.defaultOptions);
-    }
-
-    // add request options to the middleware chain
-    defaultPolicies.unshift(function(req, res, next) {
-        req.options = req.options || {};
-        _.extend(req.options, defaultOptions);
-        next();
-    });
-
-    _.keys(definition).forEach(function(key) {
-        var keyDefinition = definition[key];
-
-        // check for restify verbs first
-        if (supportedMethods.indexOf(key) !== -1) {
-            var handler;
-
-            // handle string definition
-            if (_.isString(keyDefinition)) {
-                // assume the string represents controller.action
-                var pieces = keyDefinition.split('.');
-            }
-        }
-
-        // get a reference to the key's definition
-        keyDefinition = definition[key];
-        if (_.isString(keyDefinition)) {
-            // if the keyDefinition is a string, require it
-            keyDefinition = routes[key];
-            if (!keyDefinition) keyDefinition = {};
-            if (_.isFunction(keyDefinition)) keyDefinition = keyDefinition(microservice);
-        }
-
-        // if key is a semver version, bindRoutes
-        var versionTest = /v{0,1}(\d+\.\d+\.\d+)/g.exec(key);
-        if (versionTest) {
-            bindRoutes({
-                defaultPolicies: defaultPolicies,
-                defaultOptions: defaultOptions,
-                definition: keyDefinition,
-                microservice: microservice,
-                rootPath: rootPath,
-                version: versionTest[1]
-            });
-        }
-    });
-}
-
-function handleRoute() {
-
-}
-
-function handleSubPath() {
-
-}

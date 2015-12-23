@@ -2,7 +2,7 @@
 
 module.exports = function(microservice) {
     return {
-        get: 'rest.query',
+        get: 'rest.find',
         post: 'rest.create',
         '/:id': {
             del: 'rest.remove',

@@ -19,7 +19,7 @@ module.exports = function(microservice) {
                 '/groups': {
                     // `req.options` can be augmented at sub-paths
                     //      console.log(req.options) => {desc: 'welcome to the api v1.0.0', model: 'groups'}
-                    additionalOptions: {
+                    options: {
                         model: 'groups'
                     },
                     // define additional policies to add to the policy chain for path and sub-paths
@@ -51,10 +51,22 @@ module.exports = function(microservice) {
                     // routes can be reused, while also changing the policy chain and request options
                     routes: 'rest'
                 },
+                '/say': {
+                    '/hello/(\w+)': {
+                        regex: true,
+                        get: 'greet.hello'
+                    },
+                    '/goodbye/(\w+)': {
+                        regex: true,
+                        get: 'greet.goodbye'
+                    }
+                },
                 '/users': {
                     options: {
                         model: 'users'
                     },
+                    get: 'rest.find',
+                    post: 'rest.create',
                     '/:id': {
                         // define route (DELETE /api/users/:id)
                         del: {
@@ -62,7 +74,7 @@ module.exports = function(microservice) {
                             additionalPolicies: [
                                 microservice.policies['member-of']('admins')
                             ],
-                            handler: 'rest.destroy'
+                            handler: 'rest.remove'
                         },
                         get: {
                             additionalPolicies: [
@@ -85,7 +97,8 @@ module.exports = function(microservice) {
                                         microservice.policies['blacklist']('id', {reset: true})
                                     )
                                 )
-                            ]
+                            ],
+                            handler: 'rest.update'
                         }
                     }
                 }
@@ -93,7 +106,9 @@ module.exports = function(microservice) {
             '/healthy': {
                 // route handlers can be defined inline (policies too!)
                 get: function(req, res) {
-                    res.status(200).send();
+                    req.microservice.log('silly', 'healthy called');
+                    res.status(200);
+                    res.send();
                 }
             }
         },
