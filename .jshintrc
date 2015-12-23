@@ -1,0 +1,15 @@
+{
+    "expr": true,
+    "node": true,
+    "predef": [
+        "after",
+        "afterEach",
+        "before",
+        "beforeEach",
+        "context",
+        "describe",
+        "it",
+        "microservice"
+    ],
+    "sub": true
+}
